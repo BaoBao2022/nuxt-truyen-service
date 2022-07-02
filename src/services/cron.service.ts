@@ -1,0 +1,71 @@
+import cron, {ScheduledTask} from 'node-cron';
+import NtModel from '../models/Nt.model';
+
+const baseUrl = process.env.NT_SOURCE_URL as string | 'ntc';
+const Nt = NtModel.Instance(baseUrl);
+const tasks: ScheduledTask[] = [];
+
+async function cachingNewManga() {
+  //cache page 1,2,3
+  await Nt.searchParams(-1, 15, 'undefined', 1);
+  await Nt.searchParams(-1, 15, 'undefined', 2);
+  await Nt.searchParams(-1, 15, 'undefined', 3);
+}
+
+async function cachingCompletedManga() {
+  //cache page 1,2,3
+  await Nt.getCompletedManga(1);
+  await Nt.getCompletedManga(2);
+  await Nt.getCompletedManga(3);
+}
+
+async function cachingRankingManga() {
+  //default: https://www.nettruyenco.com/tim-truyen?status=-1&sort=10&page=1
+  //cache page 1
+  //genres: manga-112
+  //sort: all, month, week, day
+  //page = this page
+  await Nt.getRanking(10, -1, 1, 'manga-112');
+  await Nt.getRanking(11, -1, 1, 'manga-112');
+  await Nt.getRanking(12, -1, 1, 'manga-112');
+  await Nt.getRanking(13, -1, 1, 'manga-112');
+}
+
+async function cachingNewUpdatedManga() {
+  //cache page 1,2,3
+  //default: https://www.nettruyenco.com/tim-truyen?status=-1&sort=10&page=1
+  //genres: all, sort: all, page = this page
+  await Nt.getNewUpdatedManga(1);
+  await Nt.getNewUpdatedManga(2);
+  await Nt.getNewUpdatedManga(3);
+}
+
+tasks.push(
+  cron.schedule('*/5 * * * *', async () => {
+    console.log('caching new UPDATED manga every 5 minutes');
+    await cachingNewUpdatedManga();
+  }),
+);
+
+tasks.push(
+  cron.schedule('*/5 * * * *', async () => {
+    console.log('caching new manga every 5 minutes');
+    await cachingNewManga();
+  }),
+);
+
+tasks.push(
+  cron.schedule('0 * * * *', async () => {
+    console.log('caching completed manga every 1 hour');
+    await cachingCompletedManga();
+  }),
+);
+
+tasks.push(
+  cron.schedule('* */12 * * *', async () => {
+    console.log('caching ranking manga every 12 hours');
+    await cachingRankingManga();
+  }),
+);
+
+export default tasks;
