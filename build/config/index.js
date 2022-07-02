@@ -1,0 +1,10 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.redisPassword = exports.redisUsername = exports.redisHost = exports.redisPort = void 0;
+const tslib_1 = require("tslib");
+const dotenv_1 = tslib_1.__importDefault(require("dotenv"));
+dotenv_1.default.config();
+exports.redisPort = Number(process.env.REDIS_PORT);
+exports.redisHost = process.env.REDIS_HOST || '127.0.0.1';
+exports.redisUsername = String(process.env.REDIS_USER_NAME);
+exports.redisPassword = String(process.env.REDIS_PASSWORD);
