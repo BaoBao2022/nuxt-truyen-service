@@ -186,7 +186,7 @@ class NtModel extends Scraper_1.default {
             if (page)
                 queryParams.page = page;
             let key = '';
-            if (genres === 'manga-112' && sort) {
+            if (genres === 'manhua' && sort) {
                 key = `${nt_1.KEY_CACHE_FILTERS_MANGA}${page !== undefined ? page : 1}${genres}${sort}`;
             }
             try {

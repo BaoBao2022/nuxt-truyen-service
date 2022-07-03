@@ -174,7 +174,7 @@ function ntController() {
         let key: string = '';
 
         //cache data for home page:::
-        if (genres === 'manga-112' && top) {
+        if (genres === 'manhua' && top) {
             key = `${KEY_CACHE_FILTERS_MANGA}${
                 page !== undefined ? page : 1
             }${genres}${MANGA_SORT[top]}`;

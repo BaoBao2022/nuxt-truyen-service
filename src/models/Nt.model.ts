@@ -300,7 +300,7 @@ export default class NtModel extends Scraper {
 
         let key: string = '';
 
-        if (genres === 'manga-112' && sort) {
+        if (genres === 'manhua' && sort) {
             key = `${KEY_CACHE_FILTERS_MANGA}${
                 page !== undefined ? page : 1
             }${genres}${sort}`;
@@ -621,10 +621,9 @@ export default class NtModel extends Scraper {
             const { data } = await this.client.get(
                 `${this.baseUrl}/truyen-tranh/${mangaSlug}/chap-${chapter}/${chapterId}`,
             );
+
             const document = parse(data);
-
-            //@ts-ignore
-
+            const title = document.querySelector(".txt-primary a")?.textContent
             const protocols = ['http', 'https'];
 
             const pagesRaw = document.querySelectorAll(
@@ -654,7 +653,7 @@ export default class NtModel extends Scraper {
                     ? srcCDN
                     : `https:${srcCDN}`;
 
-                return { id, imgSrc, imgSrcCDN };
+                return { id, title, imgSrc, imgSrcCDN };
             });
 
             return pages;

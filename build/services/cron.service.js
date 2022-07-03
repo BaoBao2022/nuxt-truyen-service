@@ -26,13 +26,13 @@ function cachingRankingManga() {
     return tslib_1.__awaiter(this, void 0, void 0, function* () {
         //default: https://www.nettruyenco.com/tim-truyen?status=-1&sort=10&page=1
         //cache page 1
-        //genres: manga-112
+        //genres: manhua
         //sort: all, month, week, day
         //page = this page
-        yield Nt.getRanking(10, -1, 1, 'manga-112');
-        yield Nt.getRanking(11, -1, 1, 'manga-112');
-        yield Nt.getRanking(12, -1, 1, 'manga-112');
-        yield Nt.getRanking(13, -1, 1, 'manga-112');
+        yield Nt.getRanking(10, -1, 1, 'manhua');
+        yield Nt.getRanking(11, -1, 1, 'manhua');
+        yield Nt.getRanking(12, -1, 1, 'manhua');
+        yield Nt.getRanking(13, -1, 1, 'manhua');
     });
 }
 function cachingNewUpdatedManga() {
