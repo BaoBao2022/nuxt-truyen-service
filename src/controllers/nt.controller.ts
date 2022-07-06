@@ -174,7 +174,7 @@ function ntController() {
         let key: string = '';
 
         //cache data for home page:::
-        if (genres === 'manhua' && top) {
+        if (genres && top) {
             key = `${KEY_CACHE_FILTERS_MANGA}${
                 page !== undefined ? page : 1
             }${genres}${MANGA_SORT[top]}`;
@@ -314,7 +314,6 @@ function ntController() {
         next: NextFunction,
     ) => {
         const { top, page, status, genres } = req.query;
-
         //nettruyen config: https://www.nettruyenco.com/tim-truyen?status=-1&sort=10
 
         const key = `${KEY_CACHE_RANKING_MANGA}${page ? page : ''}${
@@ -323,7 +322,7 @@ function ntController() {
 
         const redisData = await getCache(key);
 
-        if (!redisData) {
+        if (!redisData || redisData) {
             const { mangaData, totalPages } = await Nt.getRanking(
                 top ? MANGA_SORT[top] : 10,
                 status ? MANGA_STATUS[status] : -1,

@@ -303,7 +303,7 @@ export default class NtModel extends Scraper {
 
         let key: string = '';
 
-        if (genres === 'manhua' && sort) {
+        if (genres && sort) {
             key = `${KEY_CACHE_FILTERS_MANGA}${
                 page !== undefined ? page : 1
             }${genres}${sort}`;

@@ -86,7 +86,7 @@ function ntController() {
         const { page, genres, top, status } = req.query;
         let key = '';
         //cache data for home page:::
-        if (genres === 'manhua' && top) {
+        if (genres && top) {
             key = `${nt_1.KEY_CACHE_FILTERS_MANGA}${page !== undefined ? page : 1}${genres}${nt_2.MANGA_SORT[top]}`;
         }
         const redisData = yield (0, cache_service_1.getCache)(key);
