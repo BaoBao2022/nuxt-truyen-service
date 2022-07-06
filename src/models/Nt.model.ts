@@ -61,7 +61,8 @@ export default class NtModel extends Scraper {
 
             const newChapter = manga.querySelector('ul > li > a')?.innerHTML;
             const updatedAt = manga.querySelector('ul > li > i')?.innerHTML;
-            const view = manga.querySelector('pull-left > i')?.innerHTML;
+
+            let view = manga.querySelector('pull-left > i')?.innerHTML || manga.querySelector('pull-right > i')?.innerHTML;
             const name = normalizeString(
                 String(manga.querySelector('h3 a')?.innerHTML),
             );
@@ -91,6 +92,8 @@ export default class NtModel extends Scraper {
                         break;
                     case 'Tên khác:':
                         otherName = str;
+                    case 'Lượt xem:':
+                        view = str;
                         break;
                 }
             });
@@ -449,9 +452,9 @@ export default class NtModel extends Scraper {
             //@ts-ignore
             const { mangaData, totalPages } = this.parseSource(document);
 
-            cache(
+            await cache(
                 key,
-                JSON.stringify({ mangaData, totalPages }),
+                JSON.stringify({mangaData, totalPages}),
                 page !== undefined ? page : 1,
                 DEFAULT_EXPIRED_RANKING_MANGA_TIME,
             );
