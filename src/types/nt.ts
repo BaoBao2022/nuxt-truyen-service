@@ -10,6 +10,7 @@ export interface MangaPreview {
     genres: string[] | null;
     otherName?: string | null;
     review: string | null;
+    chapSuggests: any;
 }
 
 //nettruyen config: https://www.nettruyenco.com/tim-truyen?status=-1&sort=10

@@ -1,5 +1,5 @@
-import { AxiosRequestConfig } from 'axios';
-import { parse } from 'node-html-parser';
+import {AxiosRequestConfig} from 'axios';
+import {parse} from 'node-html-parser';
 
 import {
     DEFAULT_EXPIRED_ADVANCED_SEARCH_MANGA,
@@ -15,10 +15,10 @@ import {
     KEY_CACHE_RANKING_MANGA,
 } from '../constants/nt';
 import Scraper from '../libs/Scraper';
-import { cache } from '../services/cache.service';
-import { GENRES } from '../types/genres';
-import { GENRES_NT, NtDataList } from '../types/nt';
-import { isExactMatch, normalizeString } from '../utils/stringHandler';
+import {cache} from '../services/cache.service';
+import {GENRES} from '../types/genres';
+import {GENRES_NT, NtDataList} from '../types/nt';
+import {isExactMatch, normalizeString} from '../utils/stringHandler';
 
 interface QueryParams {
     sort?: number;
@@ -67,6 +67,30 @@ export default class NtModel extends Scraper {
                 String(manga.querySelector('h3 a')?.innerHTML),
             );
 
+            const comicItem = manga.querySelectorAll(".comic-item .chapter");
+            let chapSuggests: any = [];
+            if (comicItem) {
+                comicItem.forEach((item) => {
+                    let newItem: any = {};
+                    const chap = item.querySelector('a');
+                    const i = item.querySelector('.time')
+
+                    if (chap) {
+                        const chapNumber = chap.getAttribute('data-id')
+                        const chapId = chap.innerHTML.toLowerCase().split('chapter ')[1];
+
+                        newItem["chapId"] = chapId;
+                        newItem["chapNumber"] = chapNumber;
+                    }
+
+                    if (i) {
+                        newItem["updatedAt"] = i.innerHTML;
+                    }
+
+                    chapSuggests.push(newItem);
+                })
+            }
+
             const tooltip = manga.querySelectorAll('.box_li .message_main p');
             let status: string | null = '';
             let author: string | null = '';
@@ -92,6 +116,7 @@ export default class NtModel extends Scraper {
                         break;
                     case 'Tên khác:':
                         otherName = str;
+                        break;
                     case 'Lượt xem:':
                         view = str;
                         break;
@@ -119,6 +144,7 @@ export default class NtModel extends Scraper {
                 name,
                 updatedAt,
                 slug,
+                chapSuggests
             };
         });
 
@@ -132,7 +158,7 @@ export default class NtModel extends Scraper {
                     .trim(),
             ) || 1;
 
-        return { mangaData, totalPages };
+        return {mangaData, totalPages};
     }
 
     private unshiftProtocol(urlSrc: string) {
@@ -145,10 +171,10 @@ export default class NtModel extends Scraper {
 
     public async getMangaAuthor(author: string) {
         try {
-            const { data } = await this.client.get(
+            const {data} = await this.client.get(
                 `${this.baseUrl}/tim-truyen`,
                 {
-                    params: { 'tac-gia': author },
+                    params: {'tac-gia': author},
                 },
             );
             const document = parse(data);
@@ -157,7 +183,7 @@ export default class NtModel extends Scraper {
             return this.parseSource(document);
         } catch (err) {
             console.log(err);
-            return { mangaData: [], totalPages: 0 };
+            return {mangaData: [], totalPages: 0};
         }
     }
 
@@ -178,26 +204,26 @@ export default class NtModel extends Scraper {
         const key = `${KEY_CACHE_NEW_MANGA}${_genres}${status}${sort}${page}`;
 
         try {
-            const { data } = await this.client.get(
+            const {data} = await this.client.get(
                 `${this.baseUrl}/tim-truyen${_genres}`,
-                { params: queryParams },
+                {params: queryParams},
             );
             const document = parse(data);
 
             //@ts-ignore
-            const { mangaData, totalPages } = this.parseSource(document);
+            const {mangaData, totalPages} = this.parseSource(document);
 
             await cache(
                 key,
-                JSON.stringify({ mangaData, totalPages }),
+                JSON.stringify({mangaData, totalPages}),
                 page,
                 DEFAULT_EXPIRED_NEWMANGA_TIME,
             );
 
-            return { mangaData, totalPages };
+            return {mangaData, totalPages};
         } catch (err) {
             console.log(err);
-            return { mangaData: [], totalPages: 0 };
+            return {mangaData: [], totalPages: 0};
         }
     }
 
@@ -216,7 +242,7 @@ export default class NtModel extends Scraper {
         // );
 
         try {
-            const { data } = await this.client.get(
+            const {data} = await this.client.get(
                 `${this.baseUrl}/tim-truyen-nang-cao`,
                 {
                     params: {
@@ -233,21 +259,21 @@ export default class NtModel extends Scraper {
             const document = parse(data);
 
             //@ts-ignore
-            const { mangaData, totalPages } = this.parseSource(document);
+            const {mangaData, totalPages} = this.parseSource(document);
 
             // console.log(':: ', document.querySelector('ModuleContent'));
 
             await cache(
                 key,
-                JSON.stringify({ mangaData, totalPages }),
+                JSON.stringify({mangaData, totalPages}),
                 page,
                 DEFAULT_EXPIRED_ADVANCED_SEARCH_MANGA,
             );
 
-            return { mangaData, totalPages };
+            return {mangaData, totalPages};
         } catch (err) {
             console.log(err);
-            return { mangaData: [], totalPages: 0 };
+            return {mangaData: [], totalPages: 0};
         }
     }
 
@@ -259,7 +285,7 @@ export default class NtModel extends Scraper {
         const key = `${KEY_CACHE_NEW_UPDATED_MANGA}${page}`;
 
         try {
-            const { data } = await this.client.get(
+            const {data} = await this.client.get(
                 `${this.baseUrl}/tim-truyen`,
                 {
                     params: queryParams,
@@ -268,19 +294,19 @@ export default class NtModel extends Scraper {
             const document = parse(data);
 
             //@ts-ignore
-            const { mangaData, totalPages } = this.parseSource(document);
+            const {mangaData, totalPages} = this.parseSource(document);
 
             await cache(
                 key,
-                JSON.stringify({ mangaData, totalPages }),
+                JSON.stringify({mangaData, totalPages}),
                 page,
                 DEFAULT_EXPIRED_NEW_UPDATED_MANGA_TIME,
             );
 
-            return { mangaData, totalPages };
+            return {mangaData, totalPages};
         } catch (error) {
             console.log(error);
-            return { mangaData: [], totalPages: 0 };
+            return {mangaData: [], totalPages: 0};
         }
     }
 
@@ -310,26 +336,26 @@ export default class NtModel extends Scraper {
         }
 
         try {
-            const { data } = await this.client.get(
+            const {data} = await this.client.get(
                 `${this.baseUrl}/tim-truyen${_genres}`,
-                { params: queryParams },
+                {params: queryParams},
             );
             const document = parse(data);
 
             //@ts-ignore
-            const { mangaData, totalPages } = this.parseSource(document);
+            const {mangaData, totalPages} = this.parseSource(document);
 
             await cache(
                 key,
-                JSON.stringify({ mangaData, totalPages }),
+                JSON.stringify({mangaData, totalPages}),
                 page ? page : 1,
                 DEFAULT_EXPIRED_NEW_UPDATED_MANGA_TIME,
             );
 
-            return { mangaData, totalPages };
+            return {mangaData, totalPages};
         } catch (error) {
             console.log(error);
-            return { mangaData: [], totalPages: 0 };
+            return {mangaData: [], totalPages: 0};
         }
     }
 
@@ -337,9 +363,9 @@ export default class NtModel extends Scraper {
         const baseUrlSearch = `/Comic/Services/SuggestSearch.ashx`;
 
         try {
-            const { data } = await this.client.get(
+            const {data} = await this.client.get(
                 `${this.baseUrl}${baseUrlSearch}`,
-                { params: { q: query } },
+                {params: {q: query}},
             );
             const document = parse(data);
 
@@ -383,15 +409,15 @@ export default class NtModel extends Scraper {
                 ).trim();
                 const slug = path.substring(path.lastIndexOf('/') + 1);
 
-                return { thumbnail, name, slug, newChapter, genres };
+                return {thumbnail, name, slug, newChapter, genres};
             });
 
             const totalPages = mangaData.length;
 
-            return { mangaData, totalPages };
+            return {mangaData, totalPages};
         } catch (err) {
             console.log(err);
-            return { mangaData: [], totalPages: 0 };
+            return {mangaData: [], totalPages: 0};
         }
     }
 
@@ -399,28 +425,28 @@ export default class NtModel extends Scraper {
         const key = `${KEY_CACHE_COMPLETED_MANGA}${page}`;
 
         try {
-            const { data } = await this.client.get(
+            const {data} = await this.client.get(
                 `${this.baseUrl}/truyen-full`,
                 {
-                    params: { page: page },
+                    params: {page: page},
                 },
             );
             const document = parse(data);
 
             //@ts-ignore
-            const { mangaData, totalPages } = this.parseSource(document);
+            const {mangaData, totalPages} = this.parseSource(document);
 
             await cache(
                 key,
-                JSON.stringify({ mangaData, totalPages }),
+                JSON.stringify({mangaData, totalPages}),
                 page,
                 DEFAULT_EXPIRED_COMPLETED_MANGA_TIME,
             );
 
-            return { mangaData, totalPages };
+            return {mangaData, totalPages};
         } catch (error) {
             console.log('::: ', error);
-            return { mangaData: [], totalPages: 0 };
+            return {mangaData: [], totalPages: 0};
         }
     }
 
@@ -440,7 +466,7 @@ export default class NtModel extends Scraper {
         }${top}${status}${genres}`;
 
         try {
-            const { data } = await this.client.get(
+            const {data} = await this.client.get(
                 `${this.baseUrl}/tim-truyen${genres && `/${genres}`}`,
                 {
                     params: queryParams,
@@ -450,7 +476,7 @@ export default class NtModel extends Scraper {
             const document = parse(data);
 
             //@ts-ignore
-            const { mangaData, totalPages } = this.parseSource(document);
+            const {mangaData, totalPages} = this.parseSource(document);
 
             await cache(
                 key,
@@ -459,10 +485,10 @@ export default class NtModel extends Scraper {
                 DEFAULT_EXPIRED_RANKING_MANGA_TIME,
             );
 
-            return { mangaData, totalPages };
+            return {mangaData, totalPages};
         } catch (err) {
             console.log(err);
-            return { mangaData: [], totalPages: 0 };
+            return {mangaData: [], totalPages: 0};
         }
     }
 
@@ -470,7 +496,7 @@ export default class NtModel extends Scraper {
         const baseUrlMangaDetail = 'truyen-tranh';
 
         try {
-            const { data } = await this.client.get(
+            const {data} = await this.client.get(
                 `${this.baseUrl}/${baseUrlMangaDetail}/${mangaSlug}`,
             );
             const document = parse(data);
@@ -522,7 +548,7 @@ export default class NtModel extends Scraper {
                     hrefString.lastIndexOf('/') + 1,
                 );
 
-                return { genreTitle, slug };
+                return {genreTitle, slug};
             });
 
             const lastChildUl = document.querySelectorAll(
@@ -621,7 +647,7 @@ export default class NtModel extends Scraper {
         chapterId: string,
     ) {
         try {
-            const { data } = await this.client.get(
+            const {data} = await this.client.get(
                 `${this.baseUrl}/truyen-tranh/${mangaSlug}/chap-${chapter}/${chapterId}`,
             );
 
@@ -656,7 +682,7 @@ export default class NtModel extends Scraper {
                     ? srcCDN
                     : `https:${srcCDN}`;
 
-                return { id, title, imgSrc, imgSrcCDN };
+                return {id, title, imgSrc, imgSrcCDN};
             });
 
             return pages;
