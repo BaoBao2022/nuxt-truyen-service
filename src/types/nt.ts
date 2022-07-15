@@ -28,6 +28,8 @@ export enum MANGA_SORT {
     'day',
     'new' = 15,
     'chapter' = 30,
+    'follow' = 20,
+
 }
 
 export interface NtDataList {

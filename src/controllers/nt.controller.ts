@@ -21,6 +21,7 @@ interface RankingQuery {
     page?: number;
     status?: 'all' | 'completed' | 'ongoing' | undefined;
     genres?: GENRES_NT;
+    limit?: number;
 }
 
 interface SearchQuery extends Pick<RankingQuery, 'page'> {
@@ -171,7 +172,7 @@ function ntController() {
         res: Response,
         next: NextFunction,
     ) => {
-        const {page, genres, top, status} = req.query;
+        const {page, genres, top, status, limit} = req.query;
         let key: string = '';
 
         //cache data for home page:::
@@ -182,7 +183,6 @@ function ntController() {
         }
 
         const redisData = await getCache(key);
-
         if (!redisData) {
             const {mangaData, totalPages} = await Nt.filtersManga(
                 genres !== undefined ? genres : null,
@@ -205,12 +205,16 @@ function ntController() {
         }
 
         const {mangaData, totalPages} = JSON.parse(String(redisData));
-
         if (!mangaData.length) return res.status(404).json({success: false});
+
+        let mangas = mangaData;
+        if (limit) {
+            mangas = mangaData.slice(0, limit);
+        }
 
         return res.status(200).json({
             success: true,
-            data: mangaData,
+            data: mangas,
             totalPages: totalPages,
             hasPrevPage: Number(page) > 1 ? true : false,
             hasNextPage: Number(page) < Number(totalPages) ? true : false,
