@@ -157,10 +157,9 @@ function ntController() {
 
         if (!mangaData.length) return res.status(404).json({success: false});
 
-        const mangas = mangaData.slice(0, 16)
         return res.status(200).json({
             success: true,
-            data: mangas,
+            data: mangaData,
             totalPages: totalPages,
             hasPrevPage: Number(page) > 1 ? true : false,
             hasNextPage: Number(page) < Number(totalPages) ? true : false,
