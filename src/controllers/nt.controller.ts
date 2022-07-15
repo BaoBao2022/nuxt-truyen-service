@@ -156,9 +156,10 @@ function ntController() {
 
         if (!mangaData.length) return res.status(404).json({ success: false });
 
+        const mangas = mangaData.slice(0, 16)
         return res.status(200).json({
             success: true,
-            data: mangaData,
+            data: mangas,
             totalPages: totalPages,
             hasPrevPage: Number(page) > 1 ? true : false,
             hasNextPage: Number(page) < Number(totalPages) ? true : false,
@@ -298,10 +299,10 @@ function ntController() {
         const { mangaData, totalPages } = JSON.parse(String(redisData));
 
         if (!mangaData.length) return res.status(404).json({ success: false });
-
+        const mangas = mangaData.slice(0, 16)
         return res.status(200).json({
             success: true,
-            data: mangaData,
+            data: mangas,
             totalPages: totalPages,
             hasPrevPage: Number(page) > 1 ? true : false,
             hasNextPage: Number(page) < Number(totalPages) ? true : false,
@@ -348,9 +349,10 @@ function ntController() {
             return res.status(404).json({ success: false });
         }
 
+        const mangas = mangaData.slice(0, 7)
         return res.status(200).json({
             success: true,
-            data: mangaData,
+            data: mangas,
             hasPrevPage: Number(page) > 1 ? true : false,
             hasNextPage: Number(page) < Number(totalPages) ? true : false,
         });
