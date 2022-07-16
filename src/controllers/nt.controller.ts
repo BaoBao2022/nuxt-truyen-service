@@ -164,22 +164,31 @@ function ntController() {
         next: NextFunction,
     ) => {
         let {page, genres, sort, status, limit} = req.query;
-        console.log("req.query", req.query)
         //cache data for home page:::
-        if (!sort) {
-            sort = MANGA_SORT.all
-        }
 
         let key: string;
-        key = `${KEY_CACHE_FILTERS_MANGA}_${page || ''}_${genres || ''}_${MANGA_SORT[sort]}_${status || -1}`;
+        key = `${KEY_CACHE_FILTERS_MANGA}_${page || ''}`;
+        if (genres) {
+            key += `_${genres}`;
+        }
 
+        if (sort) {
+            key += `_${sort}`;
+        }
+
+        if (status) {
+            key += `_${status}`
+        }
+
+        console.log("key ------------", key)
         const redisData = await getCache(key);
-        if (redisData) {
+        if (!redisData) {
             const {mangaData, totalPages} = await Nt.filtersManga(
                 genres !== undefined ? genres : null,
                 page !== undefined ? page : null,
                 sort !== undefined ? (MANGA_SORT[sort] as any) : null,
-                status !== undefined ? MANGA_STATUS[status] : -1,
+                status !== undefined ? MANGA_STATUS[status] : null,
+                key,
             );
 
             if (!mangaData.length) {

@@ -17,7 +17,7 @@ import {
 import Scraper from '../libs/Scraper';
 import {cache} from '../services/cache.service';
 import {GENRES} from '../types/genres';
-import {GENRES_NT, NtDataList} from '../types/nt';
+import {GENRES_NT, MANGA_SORT, MANGA_STATUS, NtDataList} from '../types/nt';
 import {isExactMatch, normalizeString} from '../utils/stringHandler';
 
 interface QueryParams {
@@ -315,6 +315,7 @@ export default class NtModel extends Scraper {
         page?: number | null,
         sort?: number | null,
         status?: number | null,
+        key?: string | null
     ) {
         const _genres = genres !== null ? `/${genres}` : '';
 
@@ -327,17 +328,10 @@ export default class NtModel extends Scraper {
         if (status) queryParams.status = status;
         if (page) queryParams.page = page;
 
-        let key: string = '';
-
-        if (genres && sort) {
-            key = `${KEY_CACHE_FILTERS_MANGA}${
-                page !== undefined ? page : 1
-            }${genres}${sort}`;
-        }
-
+        console.log("-----key----- 2 ---------", key)
         try {
             const {data} = await this.client.get(
-                `${this.baseUrl}/tim-truyen${_genres}`,
+                `${this.baseUrl}tim-truyen${_genres}`,
                 {params: queryParams},
             );
             const document = parse(data);
@@ -346,7 +340,7 @@ export default class NtModel extends Scraper {
             const {mangaData, totalPages} = this.parseSource(document);
 
             await cache(
-                key,
+                key as string,
                 JSON.stringify({mangaData, totalPages}),
                 page ? page : 1,
                 DEFAULT_EXPIRED_NEW_UPDATED_MANGA_TIME,
