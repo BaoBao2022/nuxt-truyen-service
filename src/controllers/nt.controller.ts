@@ -22,6 +22,7 @@ interface RankingQuery {
     status?: 'all' | 'completed' | 'ongoing' | undefined;
     genres?: GENRES_NT;
     limit?: number;
+    sort?: number;
 }
 
 interface SearchQuery extends Pick<RankingQuery, 'page'> {
@@ -57,16 +58,6 @@ interface ChapterParams extends MangaParams {
 }
 
 function ntController() {
-    // const testRoute = async (
-    //     req: Request,
-    //     res: Response,
-    //     next: NextFunction,
-    // ) => {
-    //     const dataTest = await Nt.testModel();
-
-    //     return res.status(200).json({
-    //         data: dataTest,
-    //     });
     // };
 
     const advancedSearch = async (
@@ -172,22 +163,22 @@ function ntController() {
         res: Response,
         next: NextFunction,
     ) => {
-        const {page, genres, top, status, limit} = req.query;
-        let key: string = '';
-
+        let {page, genres, sort, status, limit} = req.query;
+        console.log("req.query", req.query)
         //cache data for home page:::
-        if (genres && top) {
-            key = `${KEY_CACHE_FILTERS_MANGA}${
-                page !== undefined ? page : 1
-            }${genres}${MANGA_SORT[top]}`;
+        if (!sort) {
+            sort = MANGA_SORT.all
         }
 
+        let key: string;
+        key = `${KEY_CACHE_FILTERS_MANGA}_${page || ''}_${genres || ''}_${MANGA_SORT[sort]}_${status || -1}`;
+
         const redisData = await getCache(key);
-        if (!redisData) {
+        if (redisData) {
             const {mangaData, totalPages} = await Nt.filtersManga(
                 genres !== undefined ? genres : null,
                 page !== undefined ? page : null,
-                top !== undefined ? MANGA_SORT[top] : null,
+                sort !== undefined ? (MANGA_SORT[sort] as any) : null,
                 status !== undefined ? MANGA_STATUS[status] : -1,
             );
 
@@ -195,12 +186,16 @@ function ntController() {
                 return res.status(404).json({success: false});
             }
 
+            let mangas = mangaData;
+            if (limit) {
+                mangas = mangaData.slice(0, limit);
+            }
             return res.status(200).json({
                 success: true,
-                data: mangaData,
+                data: mangas,
                 totalPages,
-                hasPrevPage: Number(page) > 1 ? true : false,
-                hasNextPage: Number(page) < Number(totalPages) ? true : false,
+                hasPrevPage: Number(page) > 1,
+                hasNextPage: Number(page) < Number(totalPages),
             });
         }
 
@@ -216,8 +211,8 @@ function ntController() {
             success: true,
             data: mangas,
             totalPages: totalPages,
-            hasPrevPage: Number(page) > 1 ? true : false,
-            hasNextPage: Number(page) < Number(totalPages) ? true : false,
+            hasPrevPage: Number(page) > 1,
+            hasNextPage: Number(page) < Number(totalPages),
         });
     };
 

@@ -1,5 +1,5 @@
 "use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
+Object.defineProperty(exports, "__esModule", {value: true});
 const tslib_1 = require("tslib");
 const node_html_parser_1 = require("node-html-parser");
 const nt_1 = require("../constants/nt");
@@ -7,21 +7,24 @@ const Scraper_1 = tslib_1.__importDefault(require("../libs/Scraper"));
 const cache_service_1 = require("../services/cache.service");
 const genres_1 = require("../types/genres");
 const stringHandler_1 = require("../utils/stringHandler");
+
 class NtModel extends Scraper_1.default {
     constructor(baseUrl, axiosConfig, timeout) {
         super(baseUrl, axiosConfig, timeout);
     }
+
     static Instance(baseUrl, axiosConfig, timeout) {
         if (!this.instance) {
             this.instance = new this(baseUrl, axiosConfig, timeout);
         }
         return this.instance;
     }
+
     parseSource(document) {
-        var _a;
+        let _a;
         const mangaList = document.querySelectorAll('.item');
         const mangaData = [...mangaList].map((manga) => {
-            var _a, _b, _c, _d, _e, _f, _g, _h;
+            let _a, _b, _c, _d, _e, _f, _g, _h;
             const thumbnail = this.unshiftProtocol(String((_a = manga.querySelector('img')) === null || _a === void 0 ? void 0 : _a.getAttribute('data-original')) || String((_b = manga.querySelector('img')) === null || _b === void 0 ? void 0 : _b.getAttribute('src')));
             const newChapter = (_c = manga.querySelector('ul > li > a')) === null || _c === void 0 ? void 0 : _c.innerHTML;
             const updatedAt = (_d = manga.querySelector('ul > li > i')) === null || _d === void 0 ? void 0 : _d.innerHTML;
@@ -33,7 +36,7 @@ class NtModel extends Scraper_1.default {
             let genres = [''];
             let otherName = '';
             tooltip.forEach((item) => {
-                var _a;
+                let _a;
                 const title = (_a = item.querySelector('label')) === null || _a === void 0 ? void 0 : _a.textContent;
                 const str = (0, stringHandler_1.normalizeString)(String(item.textContent).substring(String(item.textContent).lastIndexOf(':') + 1));
                 switch (title) {
@@ -51,6 +54,7 @@ class NtModel extends Scraper_1.default {
                         break;
                 }
             });
+
             const review = (0, stringHandler_1.normalizeString)(String((_g = manga.querySelector('.box_li .box_text')) === null || _g === void 0 ? void 0 : _g.textContent));
             const path = String((_h = manga.querySelector('h3 a')) === null || _h === void 0 ? void 0 : _h.getAttribute('href'));
             const slug = path.substring(path.lastIndexOf('/') + 1);
@@ -72,30 +76,32 @@ class NtModel extends Scraper_1.default {
         const totalPages = Number(totalPagesPath
             .substring(totalPagesPath.lastIndexOf('/') + 1)
             .trim()) || 1;
-        return { mangaData, totalPages };
+        return {mangaData, totalPages};
     }
+
     unshiftProtocol(urlSrc) {
         const protocols = ['http', 'https'];
         return protocols.some((protocol) => urlSrc.includes(protocol))
             ? urlSrc
             : `https:${urlSrc}`;
     }
+
     getMangaAuthor(author) {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
             try {
-                const { data } = yield this.client.get(`${this.baseUrl}/tim-truyen`, {
-                    params: { 'tac-gia': author },
+                const {data} = yield this.client.get(`${this.baseUrl}/tim-truyen`, {
+                    params: {'tac-gia': author},
                 });
                 const document = (0, node_html_parser_1.parse)(data);
                 //@ts-ignore
                 return this.parseSource(document);
-            }
-            catch (err) {
+            } catch (err) {
                 console.log(err);
-                return { mangaData: [], totalPages: 0 };
+                return {mangaData: [], totalPages: 0};
             }
         });
     }
+
     searchParams(status, sort, genres, page = 1) {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
             const _genres = genres !== 'undefined' ? `/${genres}` : '';
@@ -106,19 +112,22 @@ class NtModel extends Scraper_1.default {
             };
             const key = `${nt_1.KEY_CACHE_NEW_MANGA}${_genres}${status}${sort}${page}`;
             try {
-                const { data } = yield this.client.get(`${this.baseUrl}/tim-truyen${_genres}`, { params: queryParams });
+                const {data} = yield this.client.get(`${this.baseUrl}/tim-truyen${_genres}`, {params: queryParams});
                 const document = (0, node_html_parser_1.parse)(data);
                 //@ts-ignore
-                const { mangaData, totalPages } = this.parseSource(document);
-                yield (0, cache_service_1.cache)(key, JSON.stringify({ mangaData, totalPages }), page, nt_1.DEFAULT_EXPIRED_NEWMANGA_TIME);
-                return { mangaData, totalPages };
-            }
-            catch (err) {
+                const {mangaData, totalPages} = this.parseSource(document);
+                yield (0, cache_service_1.cache)(key, JSON.stringify({
+                    mangaData,
+                    totalPages
+                }), page, nt_1.DEFAULT_EXPIRED_NEWMANGA_TIME);
+                return {mangaData, totalPages};
+            } catch (err) {
                 console.log(err);
-                return { mangaData: [], totalPages: 0 };
+                return {mangaData: [], totalPages: 0};
             }
         });
     }
+
     advancedSearch(genres, minchapter, top, page, status, gender) {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
             const key = `${nt_1.KEY_CACHE_ADVANCED_MANGA}${genres}${minchapter}${top}${page}${status}${gender}`;
@@ -126,7 +135,7 @@ class NtModel extends Scraper_1.default {
             //     `genres: ${genres}, minchapter: ${minchapter}, top: ${top}, page: ${page}, status: ${status}, gender: ${gender}`,
             // );
             try {
-                const { data } = yield this.client.get(`${this.baseUrl}/tim-truyen-nang-cao`, {
+                const {data} = yield this.client.get(`${this.baseUrl}/tim-truyen-nang-cao`, {
                     params: {
                         genres,
                         gender,
@@ -138,17 +147,20 @@ class NtModel extends Scraper_1.default {
                 });
                 const document = (0, node_html_parser_1.parse)(data);
                 //@ts-ignore
-                const { mangaData, totalPages } = this.parseSource(document);
+                const {mangaData, totalPages} = this.parseSource(document);
                 // console.log(':: ', document.querySelector('ModuleContent'));
-                yield (0, cache_service_1.cache)(key, JSON.stringify({ mangaData, totalPages }), page, nt_1.DEFAULT_EXPIRED_ADVANCED_SEARCH_MANGA);
-                return { mangaData, totalPages };
-            }
-            catch (err) {
+                yield (0, cache_service_1.cache)(key, JSON.stringify({
+                    mangaData,
+                    totalPages
+                }), page, nt_1.DEFAULT_EXPIRED_ADVANCED_SEARCH_MANGA);
+                return {mangaData, totalPages};
+            } catch (err) {
                 console.log(err);
-                return { mangaData: [], totalPages: 0 };
+                return {mangaData: [], totalPages: 0};
             }
         });
     }
+
     getNewUpdatedManga(page = 1) {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
             const queryParams = {
@@ -156,21 +168,24 @@ class NtModel extends Scraper_1.default {
             };
             const key = `${nt_1.KEY_CACHE_NEW_UPDATED_MANGA}${page}`;
             try {
-                const { data } = yield this.client.get(`${this.baseUrl}/tim-truyen`, {
+                const {data} = yield this.client.get(`${this.baseUrl}/tim-truyen`, {
                     params: queryParams,
                 });
                 const document = (0, node_html_parser_1.parse)(data);
                 //@ts-ignore
-                const { mangaData, totalPages } = this.parseSource(document);
-                yield (0, cache_service_1.cache)(key, JSON.stringify({ mangaData, totalPages }), page, nt_1.DEFAULT_EXPIRED_NEW_UPDATED_MANGA_TIME);
-                return { mangaData, totalPages };
-            }
-            catch (error) {
+                const {mangaData, totalPages} = this.parseSource(document);
+                yield (0, cache_service_1.cache)(key, JSON.stringify({
+                    mangaData,
+                    totalPages
+                }), page, nt_1.DEFAULT_EXPIRED_NEW_UPDATED_MANGA_TIME);
+                return {mangaData, totalPages};
+            } catch (error) {
                 console.log(error);
-                return { mangaData: [], totalPages: 0 };
+                return {mangaData: [], totalPages: 0};
             }
         });
     }
+
     filtersManga(genres, page, sort, status) {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
             const _genres = genres !== null ? `/${genres}` : '';
@@ -190,24 +205,27 @@ class NtModel extends Scraper_1.default {
                 key = `${nt_1.KEY_CACHE_FILTERS_MANGA}${page !== undefined ? page : 1}${genres}${sort}`;
             }
             try {
-                const { data } = yield this.client.get(`${this.baseUrl}/tim-truyen${_genres}`, { params: queryParams });
+                const {data} = yield this.client.get(`${this.baseUrl}/tim-truyen${_genres}`, {params: queryParams});
                 const document = (0, node_html_parser_1.parse)(data);
                 //@ts-ignore
-                const { mangaData, totalPages } = this.parseSource(document);
-                yield (0, cache_service_1.cache)(key, JSON.stringify({ mangaData, totalPages }), page ? page : 1, nt_1.DEFAULT_EXPIRED_NEW_UPDATED_MANGA_TIME);
-                return { mangaData, totalPages };
-            }
-            catch (error) {
+                const {mangaData, totalPages} = this.parseSource(document);
+                yield (0, cache_service_1.cache)(key, JSON.stringify({
+                    mangaData,
+                    totalPages
+                }), page ? page : 1, nt_1.DEFAULT_EXPIRED_NEW_UPDATED_MANGA_TIME);
+                return {mangaData, totalPages};
+            } catch (error) {
                 console.log(error);
-                return { mangaData: [], totalPages: 0 };
+                return {mangaData: [], totalPages: 0};
             }
         });
     }
+
     searchQuery(query) {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
             const baseUrlSearch = `/Comic/Services/SuggestSearch.ashx`;
             try {
-                const { data } = yield this.client.get(`${this.baseUrl}${baseUrlSearch}`, { params: { q: query } });
+                const {data} = yield this.client.get(`${this.baseUrl}${baseUrlSearch}`, {params: {q: query}});
                 const document = (0, node_html_parser_1.parse)(data);
                 const protocols = ['http', 'https'];
                 const searchResultList = document.querySelectorAll('li');
@@ -238,36 +256,39 @@ class NtModel extends Scraper_1.default {
                     const name = (_b = manga.querySelector('h3')) === null || _b === void 0 ? void 0 : _b.innerHTML;
                     const path = String((_c = manga.querySelector('a')) === null || _c === void 0 ? void 0 : _c.getAttribute('href')).trim();
                     const slug = path.substring(path.lastIndexOf('/') + 1);
-                    return { thumbnail, name, slug, newChapter, genres };
+                    return {thumbnail, name, slug, newChapter, genres};
                 });
                 const totalPages = mangaData.length;
-                return { mangaData, totalPages };
-            }
-            catch (err) {
+                return {mangaData, totalPages};
+            } catch (err) {
                 console.log(err);
-                return { mangaData: [], totalPages: 0 };
+                return {mangaData: [], totalPages: 0};
             }
         });
     }
+
     getCompletedManga(page = 1) {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
             const key = `${nt_1.KEY_CACHE_COMPLETED_MANGA}${page}`;
             try {
-                const { data } = yield this.client.get(`${this.baseUrl}/truyen-full`, {
-                    params: { page: page },
+                const {data} = yield this.client.get(`${this.baseUrl}/truyen-full`, {
+                    params: {page: page},
                 });
                 const document = (0, node_html_parser_1.parse)(data);
                 //@ts-ignore
-                const { mangaData, totalPages } = this.parseSource(document);
-                yield (0, cache_service_1.cache)(key, JSON.stringify({ mangaData, totalPages }), page, nt_1.DEFAULT_EXPIRED_COMPLETED_MANGA_TIME);
-                return { mangaData, totalPages };
-            }
-            catch (error) {
+                const {mangaData, totalPages} = this.parseSource(document);
+                yield (0, cache_service_1.cache)(key, JSON.stringify({
+                    mangaData,
+                    totalPages
+                }), page, nt_1.DEFAULT_EXPIRED_COMPLETED_MANGA_TIME);
+                return {mangaData, totalPages};
+            } catch (error) {
                 console.log('::: ', error);
-                return { mangaData: [], totalPages: 0 };
+                return {mangaData: [], totalPages: 0};
             }
         });
     }
+
     getRanking(top, status = -1, page, genres) {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
             const queryParams = {
@@ -277,27 +298,30 @@ class NtModel extends Scraper_1.default {
             };
             const key = `${nt_1.KEY_CACHE_RANKING_MANGA}${page ? page : ''}${top}${status}${genres}`;
             try {
-                const { data } = yield this.client.get(`${this.baseUrl}/tim-truyen${genres && `/${genres}`}`, {
+                const {data} = yield this.client.get(`${this.baseUrl}/tim-truyen${genres && `/${genres}`}`, {
                     params: queryParams,
                 });
                 const document = (0, node_html_parser_1.parse)(data);
                 //@ts-ignore
-                const { mangaData, totalPages } = this.parseSource(document);
-                (0, cache_service_1.cache)(key, JSON.stringify({ mangaData, totalPages }), page !== undefined ? page : 1, nt_1.DEFAULT_EXPIRED_RANKING_MANGA_TIME);
-                return { mangaData, totalPages };
-            }
-            catch (err) {
+                const {mangaData, totalPages} = this.parseSource(document);
+                (0, cache_service_1.cache)(key, JSON.stringify({
+                    mangaData,
+                    totalPages
+                }), page !== undefined ? page : 1, nt_1.DEFAULT_EXPIRED_RANKING_MANGA_TIME);
+                return {mangaData, totalPages};
+            } catch (err) {
                 console.log(err);
-                return { mangaData: [], totalPages: 0 };
+                return {mangaData: [], totalPages: 0};
             }
         });
     }
+
     getMangaDetail(mangaSlug) {
         var _a, _b, _c, _d, _e;
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
             const baseUrlMangaDetail = 'truyen-tranh';
             try {
-                const { data } = yield this.client.get(`${this.baseUrl}/${baseUrlMangaDetail}/${mangaSlug}`);
+                const {data} = yield this.client.get(`${this.baseUrl}/${baseUrlMangaDetail}/${mangaSlug}`);
                 const document = (0, node_html_parser_1.parse)(data);
                 const rootSelector = '#item-detail';
                 const title = (0, stringHandler_1.normalizeString)(String((_a = document.querySelector(`${rootSelector} h1`)) === null || _a === void 0 ? void 0 : _a.textContent));
@@ -312,7 +336,7 @@ class NtModel extends Scraper_1.default {
                     const genreTitle = (0, stringHandler_1.normalizeString)(String(genre.textContent));
                     const hrefString = String(genre.getAttribute('href'));
                     const slug = hrefString.substring(hrefString.lastIndexOf('/') + 1);
-                    return { genreTitle, slug };
+                    return {genreTitle, slug};
                 });
                 const lastChildUl = document.querySelectorAll(`${rootSelector} .detail-info .list-info .row`);
                 const view = (0, stringHandler_1.normalizeString)(String(lastChildUl[lastChildUl.length - 1].querySelectorAll('p')[1]
@@ -351,8 +375,7 @@ class NtModel extends Scraper_1.default {
                     review,
                     chapterList,
                 };
-            }
-            catch (error) {
+            } catch (error) {
                 // console.log(error);
                 return {
                     title: '',
@@ -368,10 +391,11 @@ class NtModel extends Scraper_1.default {
             }
         });
     }
+
     getChapterSrc(mangaSlug, chapter, chapterId) {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
             try {
-                const { data } = yield this.client.get(`${this.baseUrl}/truyen-tranh/${mangaSlug}/chap-${chapter}/${chapterId}`);
+                const {data} = yield this.client.get(`${this.baseUrl}/truyen-tranh/${mangaSlug}/chap-${chapter}/${chapterId}`);
                 const document = (0, node_html_parser_1.parse)(data);
                 //@ts-ignore
                 const protocols = ['http', 'https'];
@@ -390,15 +414,15 @@ class NtModel extends Scraper_1.default {
                     const imgSrcCDN = protocols.some((protocol) => srcCDN === null || srcCDN === void 0 ? void 0 : srcCDN.includes(protocol))
                         ? srcCDN
                         : `https:${srcCDN}`;
-                    return { id, imgSrc, imgSrcCDN };
+                    return {id, imgSrc, imgSrcCDN};
                 });
                 return pages;
-            }
-            catch (err) {
+            } catch (err) {
                 console.log(err);
                 return null;
             }
         });
     }
 }
+
 exports.default = NtModel;

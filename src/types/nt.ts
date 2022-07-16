@@ -21,14 +21,15 @@ export enum MANGA_STATUS {
 }
 //nettruyen config: https://www.nettruyenco.com/tim-truyen?status=-1&sort=10
 export enum MANGA_SORT {
-    'newComic' = 0,
-    'all' = 10,
-    'month',
-    'week',
-    'day',
-    'new' = 15,
-    'chapter' = 30,
-    'follow' = 20,
+    newComic = 0,
+    all = 10,
+    month = 11,
+    week = 12,
+    day= 13,
+    new = 15,
+    chapter = 30,
+    follow = 20,
+    comment = 25,
 
 }
 
