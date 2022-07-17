@@ -532,6 +532,10 @@ export default class NtModel extends Scraper {
                 ),
             );
 
+            const follow = document.querySelectorAll(
+                `${rootSelector} .detail-info .follow b`,
+            )[0].textContent;
+
             const genresArrayRaw = document
                 .querySelectorAll(`${rootSelector} .kind p`)[1]
                 .querySelectorAll('a');
@@ -618,6 +622,7 @@ export default class NtModel extends Scraper {
                 view,
                 review,
                 chapterList,
+                follow
             };
         } catch (error) {
             // console.log(error);
@@ -631,6 +636,7 @@ export default class NtModel extends Scraper {
                 view: '',
                 review: '',
                 chapterList: '',
+                follow: ''
             };
         }
     }

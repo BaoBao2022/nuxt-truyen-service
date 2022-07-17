@@ -7,7 +7,7 @@ import logger from 'morgan';
 import { ErrorType } from '@/types/http';
 
 import route from './routes';
-import tasks from './services/cron.service';
+// import tasks from './services/cron.service';
 
 dotenv.config();
 
@@ -52,4 +52,4 @@ app.listen(port, () => {
     console.log(`⚡️[server]: Server is running at ${port}`);
 });
 
-tasks.forEach((task) => task.start());
+// tasks.forEach((task) => task.start());

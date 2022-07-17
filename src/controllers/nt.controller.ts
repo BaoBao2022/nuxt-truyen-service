@@ -421,9 +421,8 @@ function ntController() {
             view,
             review,
             chapterList,
+            follow
         } = await Nt.getMangaDetail(String(mangaSlug));
-
-        // if (!title.length) return res.status(404).json({ sucess: false });
 
         res.status(200).json({
             success: true,
@@ -438,6 +437,7 @@ function ntController() {
                 view,
                 review,
                 chapterList,
+                follow
             },
         });
     };
