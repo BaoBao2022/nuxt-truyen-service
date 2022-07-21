@@ -10,7 +10,7 @@ const Nt = NtModel.Instance(baseUrl);
 const tasks: ScheduledTask[] = [];
 
 tasks.push(
-    cron.schedule('0 */1 * * *', async () => {
+    cron.schedule('0 */2 * * *', async () => {
         // Run cron every 1 hour
         console.log('Start cron tab manga update first 10 pages');
         const limit = 5;
