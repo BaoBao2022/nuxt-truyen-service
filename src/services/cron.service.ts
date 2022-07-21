@@ -54,7 +54,7 @@ tasks.push(
                 otherName: res.otherName,
                 thumbnail: res.thumbnail,
                 updatedAt: manga.updatedAt,
-                updated: res.updatedAt,
+                updated: timeStamp,
                 view: manga.view,
                 follow: manga.follow,
                 comment: manga.comment,
