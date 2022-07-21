@@ -2,15 +2,13 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import express, { NextFunction, Request, Response } from 'express';
 import createError from 'http-errors';
-import logger from 'morgan';
-
 import { ErrorType } from '@/types/http';
+import logger from 'morgan';
+import { connectDB } from './mongoose/init';
 
 import route from './routes';
-// import tasks from './services/cron.service';
-
+import tasks from './services/cron.service';
 dotenv.config();
-
 const app = express();
 const port = process.env.PORT || 5001;
 
@@ -48,8 +46,16 @@ app.use((err: ErrorType, req: Request, res: Response, next: NextFunction) => {
     });
 });
 
+connectDB()
+    .then(() => {
+        console.log('connected mongodb success');
+    })
+    .catch((err) => {
+        console.warn('err::', err);
+    });
+
 app.listen(port, () => {
     console.log(`⚡️[server]: Server is running at ${port}`);
 });
 
-// tasks.forEach((task) => task.start());
+tasks.forEach((task) => task.start());

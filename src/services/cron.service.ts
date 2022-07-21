@@ -1,71 +1,95 @@
-// import cron, {ScheduledTask} from 'node-cron';
-// import NtModel from '../models/Nt.model';
-//
-// const baseUrl = process.env.NT_SOURCE_URL as string | 'ntc';
-// const Nt = NtModel.Instance(baseUrl);
-// const tasks: ScheduledTask[] = [];
-//
-// async function cachingNewManga() {
-//   //cache page 1,2,3
-//   await Nt.searchParams(-1, 15, 'undefined', 1);
-//   await Nt.searchParams(-1, 15, 'undefined', 2);
-//   await Nt.searchParams(-1, 15, 'undefined', 3);
-// }
-//
-// async function cachingCompletedManga() {
-//   //cache page 1,2,3
-//   await Nt.getCompletedManga(1);
-//   await Nt.getCompletedManga(2);
-//   await Nt.getCompletedManga(3);
-// }
-//
-// async function cachingRankingManga() {
-//   //default: https://www.nettruyenco.com/tim-truyen?status=-1&sort=10&page=1
-//   //cache page 1
-//   //genres: manhua
-//   //sort: all, month, week, day
-//   //page = this page
-//   await Nt.getRanking(10, -1, 1, 'manhua');
-//   await Nt.getRanking(11, -1, 1, 'manhua');
-//   await Nt.getRanking(12, -1, 1, 'manhua');
-//   await Nt.getRanking(13, -1, 1, 'manhua');
-// }
-//
-// async function cachingNewUpdatedManga() {
-//   //cache page 1,2,3
-//   //default: https://www.nettruyenco.com/tim-truyen?status=-1&sort=10&page=1
-//   //genres: all, sort: all, page = this page
-//   await Nt.getNewUpdatedManga(1);
-//   await Nt.getNewUpdatedManga(2);
-//   await Nt.getNewUpdatedManga(3);
-// }
-//
-// tasks.push(
-//   cron.schedule('*/5 * * * *', async () => {
-//     console.log('caching new UPDATED manga every 5 minutes');
-//     await cachingNewUpdatedManga();
-//   }),
-// );
-//
-// tasks.push(
-//   cron.schedule('*/5 * * * *', async () => {
-//     console.log('caching new manga every 5 minutes');
-//     await cachingNewManga();
-//   }),
-// );
-//
-// tasks.push(
-//   cron.schedule('0 * * * *', async () => {
-//     console.log('caching completed manga every 1 hour');
-//     await cachingCompletedManga();
-//   }),
-// );
-//
-// tasks.push(
-//   cron.schedule('* */12 * * *', async () => {
-//     console.log('caching ranking manga every 12 hours');
-//     await cachingRankingManga();
-//   }),
-// );
-//
-// export default tasks;
+import cron, { ScheduledTask } from 'node-cron';
+import ReadManga from '../mongoose/models/read.manga';
+import ChapterList from '../mongoose/models/chapter.list';
+import MangaSchema from '../mongoose/models/manga';
+import NtModel from '../models/Nt.model';
+import { resolve } from 'path';
+
+const baseUrl = process.env.NT_SOURCE_URL as string | 'ntc';
+const Nt = NtModel.Instance(baseUrl);
+const tasks: ScheduledTask[] = [];
+
+tasks.push(
+    cron.schedule('0 */1 * * *', async () => {
+        // Run cron every 1 hour
+        console.log('Start cron tab manga update first 10 pages');
+        const limit = 5;
+        let page = 1;
+
+        const mangas = [];
+        for (const i of Array(limit).keys()) {
+            const res = await Nt.getNewUpdatedManga(page);
+            for (const manga of res.mangaData) {
+                mangas.push(manga);
+            }
+
+            page++;
+        }
+
+        let x = 0;
+        for (const manga of mangas) {
+            const res = await Nt.getMangaDetail(manga.slug);
+
+            console.log('manga.slug', manga.slug);
+            console.log('res', res.updatedAt);
+
+            const filter = {
+                slug: manga.slug,
+            };
+
+            const updateAtStr = res.updatedAt
+                .replace('[Cập nhật lúc:', '')
+                .replace(']', '');
+            const dateFormat = updateAtStr.replace(' ', '/').split('/');
+            const timeStamp = new Date(
+                `${dateFormat[0]} ${dateFormat[3]}/${dateFormat[2]}/${dateFormat[1]}`,
+            ).getTime();
+
+            const data = {
+                type: 'truyen-tranh',
+                name: manga.name,
+                status: manga.status,
+                author: manga.author,
+                review: manga.review,
+                otherName: res.otherName,
+                thumbnail: res.thumbnail,
+                updatedAt: manga.updatedAt,
+                updated: res.updatedAt,
+                view: manga.view,
+                follow: manga.follow,
+                comment: manga.comment,
+                slug: manga.slug,
+                genres: res.genres,
+                chapSuggests: manga.chapSuggests,
+                chapterList: res.chapterList,
+            };
+
+            const found = await MangaSchema.findOne(filter);
+            if (found) {
+                console.log('not found', data.updatedAt);
+                console.log('not found', data.updated);
+
+                await MangaSchema.updateOne(filter, {
+                    updated: timeStamp,
+                    updatedAt: manga.updatedAt,
+                    comment: manga.comment,
+                    follow: manga.follow,
+                    view: manga.view,
+                    chapterList: res.chapterList,
+                    status: manga.status,
+                    review: manga.review,
+                    author: manga.author,
+                });
+            }
+
+            if (!found) {
+                console.log('found', x++);
+                MangaSchema.insertMany([data]);
+            }
+        }
+
+        console.log('End cron tab manga update first 10 pages');
+    }),
+);
+
+export default tasks;

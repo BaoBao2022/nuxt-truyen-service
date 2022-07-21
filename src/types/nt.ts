@@ -11,6 +11,8 @@ export interface MangaPreview {
     otherName?: string | null;
     review: string | null;
     chapSuggests: any;
+    follow: string;
+    comment: string;
 }
 
 //nettruyen config: https://www.nettruyenco.com/tim-truyen?status=-1&sort=10
@@ -25,12 +27,11 @@ export enum MANGA_SORT {
     all = 10,
     month = 11,
     week = 12,
-    day= 13,
+    day = 13,
     new = 15,
     chapter = 30,
     follow = 20,
     comment = 25,
-
 }
 
 export interface NtDataList {

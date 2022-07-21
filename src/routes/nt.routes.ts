@@ -54,10 +54,6 @@ router.route('/new-updated').get(ntController().getNewUpdatedManga);
 */
 router.route('/completed').get(ntController().getCompletedManga);
 
-/*
-this route just test!
-/nt/test
-*/
-// router.route('/test').get(ntController().testRoute);
+router.route('/crawl-v1').get(ntController().crawl_v1);
 
 export default router;
