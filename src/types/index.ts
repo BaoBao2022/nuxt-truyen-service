@@ -1,2 +1,2 @@
 export * from './nt';
-export * from './manga';
+// export * from './manga';
