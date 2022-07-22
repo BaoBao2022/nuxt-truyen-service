@@ -10,7 +10,7 @@ const MangaSchema = new Schema({
     otherName: String,
     thumbnail: String,
     updatedAt: String,
-    updated: String,
+    updated: Number,
     view: String,
     follow: String,
     comment: String,

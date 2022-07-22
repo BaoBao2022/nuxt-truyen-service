@@ -1,19 +1,20 @@
-import cron, { ScheduledTask } from 'node-cron';
+import cron, {ScheduledTask} from 'node-cron';
 import ReadManga from '../mongoose/models/read.manga';
 import ChapterList from '../mongoose/models/chapter.list';
 import MangaSchema from '../mongoose/models/manga';
 import NtModel from '../models/Nt.model';
-import { resolve } from 'path';
+import {resolve} from 'path';
 
 const baseUrl = process.env.NT_SOURCE_URL as string | 'ntc';
 const Nt = NtModel.Instance(baseUrl);
 const tasks: ScheduledTask[] = [];
 
 tasks.push(
-    cron.schedule('0 */2 * * *', async () => {
+    // 0 */2 * * *
+    cron.schedule('02 08 * * *', async () => {
         // Run cron every 1 hour
         console.log('Start cron tab manga update first 10 pages');
-        const limit = 5;
+        const limit = 10;
         let page = 1;
 
         const mangas = [];
@@ -63,6 +64,7 @@ tasks.push(
 
             const found = await MangaSchema.findOne(filter);
             if (found) {
+                console.log("found")
                 await MangaSchema.updateOne(filter, {
                     updated: timeStamp,
                     updatedAt: manga.updatedAt,
@@ -78,6 +80,7 @@ tasks.push(
             }
 
             if (!found) {
+                console.log("!found")
                 MangaSchema.insertMany([data]);
             }
         }
