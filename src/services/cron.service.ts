@@ -30,9 +30,6 @@ tasks.push(
         for (const manga of mangas) {
             const res = await Nt.getMangaDetail(manga.slug);
 
-            console.log('manga.slug', manga.slug);
-            console.log('res', res.updatedAt);
-
             const filter = {
                 slug: manga.slug,
             };
@@ -55,8 +52,8 @@ tasks.push(
                 thumbnail: res.thumbnail,
                 updatedAt: manga.updatedAt,
                 updated: timeStamp,
-                view: manga.view,
-                follow: manga.follow,
+                view: res.view,
+                follow: res.follow,
                 comment: manga.comment,
                 slug: manga.slug,
                 genres: res.genres,
@@ -66,9 +63,6 @@ tasks.push(
 
             const found = await MangaSchema.findOne(filter);
             if (found) {
-                console.log('not found', data.updatedAt);
-                console.log('not found', data.updated);
-
                 await MangaSchema.updateOne(filter, {
                     updated: timeStamp,
                     updatedAt: manga.updatedAt,
@@ -83,7 +77,6 @@ tasks.push(
             }
 
             if (!found) {
-                console.log('found', x++);
                 MangaSchema.insertMany([data]);
             }
         }
