@@ -73,6 +73,7 @@ tasks.push(
                     status: manga.status,
                     review: manga.review,
                     author: manga.author,
+                    genres: res.genres,
                 });
             }
 
