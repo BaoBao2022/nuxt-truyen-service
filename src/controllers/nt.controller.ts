@@ -1,7 +1,7 @@
-import {NextFunction, Request, Response} from 'express';
-import {getCache} from '../services/cache.service';
+import { NextFunction, Request, Response } from 'express';
+import { getCache } from '../services/cache.service';
 import MangaSchema from '../mongoose/models/manga';
-import {Manga} from '@/mongoose/models';
+import { Manga } from '@/mongoose/models';
 
 import {
     KEY_CACHE_ADVANCED_MANGA,
@@ -12,8 +12,8 @@ import {
     KEY_CACHE_RANKING_MANGA,
 } from '../constants/nt';
 import NtModel from '../models/Nt.model';
-import {GENRES_NT, MANGA_SORT, MANGA_STATUS} from '../types/nt';
-import {resolve} from 'path';
+import { GENRES_NT, MANGA_SORT, MANGA_STATUS } from '../types/nt';
+import { resolve } from 'path';
 
 const baseUrl = process.env.NT_SOURCE_URL as string;
 const Nt = NtModel.Instance(baseUrl);
@@ -47,8 +47,7 @@ interface NewMangaQuery extends Pick<RankingQuery, 'page'> {
     genres: string;
 }
 
-interface FiltersManga extends Partial<RankingQuery> {
-}
+interface FiltersManga extends Partial<RankingQuery> {}
 
 interface MangaParams {
     mangaSlug: string;
@@ -67,7 +66,7 @@ function ntController() {
         res: Response,
         next: NextFunction,
     ) => {
-        const {genres, minchapter, top, page, status, gender} = req.query;
+        const { genres, minchapter, top, page, status, gender } = req.query;
 
         const _genres = genres ? genres : '-1';
         const _gender = gender ? gender : -1;
@@ -82,7 +81,7 @@ function ntController() {
 
         if (!redisData) {
             console.log('cache miss');
-            const {mangaData, totalPages} = await Nt.advancedSearch(
+            const { mangaData, totalPages } = await Nt.advancedSearch(
                 _genres,
                 _minChapter,
                 _top,
@@ -92,7 +91,7 @@ function ntController() {
             );
 
             if (!mangaData.length) {
-                return res.status(404).json({success: false});
+                return res.status(404).json({ success: false });
             }
 
             return res.status(200).json({
@@ -104,9 +103,9 @@ function ntController() {
             });
         }
 
-        const {mangaData, totalPages} = JSON.parse(String(redisData));
+        const { mangaData, totalPages } = JSON.parse(String(redisData));
 
-        if (!mangaData.length) return res.status(404).json({success: false});
+        if (!mangaData.length) return res.status(404).json({ success: false });
 
         return res.status(200).json({
             success: true,
@@ -122,7 +121,7 @@ function ntController() {
         res: Response,
         next: NextFunction,
     ) => {
-        const {page} = req.query;
+        const { page } = req.query;
         const _page = page !== undefined ? page : 1;
 
         const key = `${KEY_CACHE_NEW_UPDATED_MANGA}${_page}`;
@@ -130,12 +129,12 @@ function ntController() {
         const redisData = await getCache(key);
 
         if (!redisData) {
-            const {mangaData, totalPages} = await Nt.getNewUpdatedManga(
+            const { mangaData, totalPages } = await Nt.getNewUpdatedManga(
                 _page,
             );
 
             if (!mangaData.length) {
-                return res.status(404).json({success: false});
+                return res.status(404).json({ success: false });
             }
 
             return res.status(200).json({
@@ -147,9 +146,9 @@ function ntController() {
             });
         }
 
-        const {mangaData, totalPages} = JSON.parse(String(redisData));
+        const { mangaData, totalPages } = JSON.parse(String(redisData));
 
-        if (!mangaData.length) return res.status(404).json({success: false});
+        if (!mangaData.length) return res.status(404).json({ success: false });
 
         return res.status(200).json({
             success: true,
@@ -165,7 +164,7 @@ function ntController() {
         res: Response,
         next: NextFunction,
     ) => {
-        let {page, genres, sort, status, limit} = req.query;
+        let { page, genres, sort, status, limit } = req.query;
         //cache data for home page:::
 
         let key: string;
@@ -185,7 +184,7 @@ function ntController() {
         console.log('key ------------', key);
         const redisData = await getCache(key);
         if (!redisData) {
-            const {mangaData, totalPages} = await Nt.filtersManga(
+            const { mangaData, totalPages } = await Nt.filtersManga(
                 genres !== undefined ? genres : null,
                 page !== undefined ? page : null,
                 sort !== undefined ? (MANGA_SORT[sort] as any) : null,
@@ -194,7 +193,7 @@ function ntController() {
             );
 
             if (!mangaData.length) {
-                return res.status(404).json({success: false});
+                return res.status(404).json({ success: false });
             }
 
             let mangas = mangaData;
@@ -210,8 +209,8 @@ function ntController() {
             });
         }
 
-        const {mangaData, totalPages} = JSON.parse(String(redisData));
-        if (!mangaData.length) return res.status(404).json({success: false});
+        const { mangaData, totalPages } = JSON.parse(String(redisData));
+        if (!mangaData.length) return res.status(404).json({ success: false });
 
         let mangas = mangaData;
         if (limit) {
@@ -227,140 +226,39 @@ function ntController() {
         });
     };
 
-    const crawl_v1 = async (
+    const getMangaBy = async (
         req: Request<{}, {}, {}, FiltersManga>,
         res: Response,
         next: NextFunction,
     ) => {
-        let {page, genres, sort, status, limit} = req.query;
-        //cache data for home page:::
+        let { page, genres, status, limit } = req.query;
 
-        const pageLimit = 1;
-        let pa = page;
-        const mangas: any = [];
-        for (let i = 0; i < pageLimit; i++) {
-            if (pa) {
-                pa++;
-            }
-
-            console.log('pa', pa);
-
-            let key = 12;
-            const {mangaData, totalPages} = await Nt.filtersMangaTest(
-                genres !== undefined ? genres : null,
-                page !== undefined ? page : null,
-                key,
-            );
-
-            if (mangaData && mangaData.length > 0) {
-                mangaData.forEach((manga) => {
-                    mangas.push({
-                        name: manga.name,
-                        status: manga.status,
-                        author: manga.author,
-                        review: manga.review,
-                        otherName: manga.otherName,
-                        thumbnail: manga.thumbnail,
-                        updatedAt: manga.updatedAt,
-                        view: manga.view,
-                        follow: manga.follow,
-                        comment: manga.comment,
-                        slug: manga.slug,
-                        genres: manga.genres,
-                        chapSuggests: manga.chapSuggests,
-                    });
-                });
-            }
+        if (!limit) {
+            limit = 20;
         }
-        // let key: string;
-        // key = `${KEY_CACHE_FILTERS_MANGA}_${page || ''}`;
-        // if (genres) {
-        //     key += `_${genres}`;
-        // }
 
-        // if (sort) {
-        //     key += `_${sort}`;
-        // }
+        let filter: any = {};
+        if (genres) {
+            filter['genres'] = genres;
+        }
 
-        // if (status) {
-        //     key += `_${status}`;
-        // }
+        if (status) {
+            filter['status'] = status;
+        }
 
-        // console.log('key ------------', key);
-        // const redisData = await getCache(key);
-        // if (!redisData) {
-        //     const { mangaData, totalPages } = await Nt.filtersManga(
-        //         genres !== undefined ? genres : null,
-        //         page !== undefined ? page : null,
-        //         sort !== undefined ? (MANGA_SORT[sort] as any) : null,
-        //         status !== undefined ? MANGA_STATUS[status] : null,
-        //         key,
-        //     );
-
-        //     if (!mangaData.length) {
-        //         return res.status(404).json({ success: false });
-        //     }
-
-        //     let mangas = mangaData;
-        //     if (limit) {
-        //         mangas = mangaData.slice(0, limit);
-        //     }
-        //     return res.status(200).json({
-        //         success: true,
-        //         data: mangas,
-        //         totalPages,
-        //         hasPrevPage: Number(page) > 1,
-        //         hasNextPage: Number(page) < Number(totalPages),
-        //     });
-        // }
-
-        // const { mangaData, totalPages } = JSON.parse(String(redisData));
-        // if (!mangaData.length) return res.status(404).json({ success: false });
-
-        // let mangas = mangaData;
-        // if (limit) {
-        //     mangas = mangaData.slice(0, limit);
-        // }
-
-        // const insertManyManga: Manga[] = [];
-        // mangaData.forEach((manga: Manga) => {
-        //     insertManyManga.push({
-        //         name: manga.name,
-        //         status: manga.status,
-        //         author: manga.author,
-        //         review: manga.review,
-        //         otherName: manga.otherName,
-        //         thumbnail: manga.thumbnail,
-        //         updatedAt: manga.updatedAt,
-        //         view: manga.view,
-        //         follow: manga.follow,
-        //         comment: manga.comment,
-        //         slug: manga.slug,
-        //         genres: manga.genres,
-        //         chapSuggests: manga.chapSuggests,
-        //     });
-        // });
-
-        // await MangaSchema.insertMany(insertManyManga)
-        //     .then((res) => {
-        //         console.log('insertMany success');
-        //     })
-        //     .catch((err) => {
-        //         console.log('err', err);
-        //     });
+        console.log('limit', limit);
+        console.log('filter', filter);
+        const mangas = await MangaSchema.find({
+            'genres.slug': ['dam-my', 'manhua'],
+        })
+            .sort({ updated: -1 })
+            .limit(10);
 
         return res.status(200).json({
-            ok: true,
+            success: true,
             data: mangas,
+            total: mangas.length,
         });
-
-        // return res.status(200).json({
-        //     success: true,
-        //     data: mangas,
-        //     totalPages: totalPages,
-        //     hasPrevPage: Number(page) > 1,
-        //     hasNextPage: Number(page) < Number(totalPages),
-        // });
     };
 
     const getCompletedManga = async (
@@ -368,7 +266,7 @@ function ntController() {
         res: Response,
         next: NextFunction,
     ) => {
-        const {page} = req.query;
+        const { page } = req.query;
 
         const key = `${KEY_CACHE_COMPLETED_MANGA}${
             page !== undefined ? page : 1
@@ -377,12 +275,12 @@ function ntController() {
         const redisData = await getCache(key);
         if (!redisData) {
             console.log('cache miss');
-            const {mangaData, totalPages} = await Nt.getCompletedManga(
+            const { mangaData, totalPages } = await Nt.getCompletedManga(
                 Number(page),
             );
 
             if (!mangaData.length) {
-                return res.status(404).json({success: false});
+                return res.status(404).json({ success: false });
             }
 
             return res.status(200).json({
@@ -394,9 +292,9 @@ function ntController() {
             });
         }
         console.log('cache hit');
-        const {mangaData, totalPages} = JSON.parse(String(redisData));
+        const { mangaData, totalPages } = JSON.parse(String(redisData));
 
-        if (!mangaData.length) return res.status(404).json({success: false});
+        if (!mangaData.length) return res.status(404).json({ success: false });
         return res.status(200).json({
             success: true,
             data: mangaData,
@@ -411,7 +309,7 @@ function ntController() {
         res: Response,
         next: NextFunction,
     ) => {
-        const {page, genres} = req.query;
+        const { page, genres } = req.query;
         const _genres = genres !== undefined ? `/${genres}` : '';
 
         const key = `${KEY_CACHE_NEW_MANGA}${_genres}${-1}${15}${
@@ -421,7 +319,7 @@ function ntController() {
         const redisData = await getCache(key);
 
         if (!redisData) {
-            const {mangaData, totalPages} = await Nt.searchParams(
+            const { mangaData, totalPages } = await Nt.searchParams(
                 -1,
                 15,
                 String(genres),
@@ -429,7 +327,7 @@ function ntController() {
             );
 
             if (!mangaData.length)
-                return res.status(404).json({success: false});
+                return res.status(404).json({ success: false });
 
             return res.status(200).json({
                 success: true,
@@ -440,9 +338,9 @@ function ntController() {
             });
         }
 
-        const {mangaData, totalPages} = JSON.parse(String(redisData));
+        const { mangaData, totalPages } = JSON.parse(String(redisData));
 
-        if (!mangaData.length) return res.status(404).json({success: false});
+        if (!mangaData.length) return res.status(404).json({ success: false });
         const mangas = mangaData.slice(0, 16);
         return res.status(200).json({
             success: true,
@@ -458,7 +356,7 @@ function ntController() {
         res: Response,
         next: NextFunction,
     ) => {
-        const {top, page, status, genres} = req.query;
+        const { top, page, status, genres } = req.query;
         //nettruyen config: https://www.nettruyenco.com/tim-truyen?status=-1&sort=10
 
         const key = `${KEY_CACHE_RANKING_MANGA}${page ? page : ''}${
@@ -468,7 +366,7 @@ function ntController() {
         const redisData = await getCache(key);
 
         if (!redisData || redisData) {
-            const {mangaData, totalPages} = await Nt.getRanking(
+            const { mangaData, totalPages } = await Nt.getRanking(
                 top ? MANGA_SORT[top] : 10,
                 status ? MANGA_STATUS[status] : -1,
                 page ? page : undefined,
@@ -476,7 +374,7 @@ function ntController() {
             );
 
             if (!mangaData.length) {
-                return res.status(404).json({success: false});
+                return res.status(404).json({ success: false });
             }
 
             return res.status(200).json({
@@ -487,10 +385,10 @@ function ntController() {
             });
         }
 
-        const {mangaData, totalPages} = JSON.parse(redisData);
+        const { mangaData, totalPages } = JSON.parse(redisData);
 
         if (!mangaData.length) {
-            return res.status(404).json({success: false});
+            return res.status(404).json({ success: false });
         }
 
         const mangas = mangaData.slice(0, 7);
@@ -507,14 +405,14 @@ function ntController() {
         res: Response,
         next: NextFunction,
     ) => {
-        const {q, limit} = req.query;
-        let {page} = req.query;
+        const { q, limit } = req.query;
+        let { page } = req.query;
 
         console.log('qqq', q);
-        const {mangaData, totalPages} = await Nt.searchQuery(String(q));
+        const { mangaData, totalPages } = await Nt.searchQuery(String(q));
 
         if (!mangaData.length) {
-            return res.status(404).json({success: false});
+            return res.status(404).json({ success: false });
         }
 
         let _mangaData = [...mangaData];
@@ -545,18 +443,30 @@ function ntController() {
         res: Response,
         next: NextFunction,
     ) => {
-        const {mangaSlug} = req.params;
+        const { mangaSlug } = req.params;
 
-        const manga = await MangaSchema.findOne({
-            slug: mangaSlug,
-        });
+        const {
+            title,
+            updatedAt,
+            thumbnail,
+            otherName,
+            author,
+            status,
+            genres,
+            view,
+            review,
+            chapterList,
+            follow,
+        } = await Nt.getMangaDetail(String(mangaSlug));
 
-        if (!manga) {
-            const {
-                title,
+        res.status(200).json({
+            success: true,
+            ///* A type alias. */
+            data: {
+                name: title,
                 updatedAt,
-                thumbnail,
                 otherName,
+                thumbnail,
                 author,
                 status,
                 genres,
@@ -564,56 +474,7 @@ function ntController() {
                 review,
                 chapterList,
                 follow,
-            } = await Nt.getMangaDetail(String(mangaSlug));
-
-            const updateAtStr = updatedAt
-                .replace('[Cập nhật lúc:', '')
-                .replace(']', '');
-            const dateFormat = updateAtStr.replace(' ', '/').split('/');
-            const timeStamp = new Date(
-                `${dateFormat[0]} ${dateFormat[3]}/${dateFormat[2]}/${dateFormat[1]}`,
-            ).getTime();
-
-            const data = {
-                type: 'truyen-tranh',
-                name: title,
-                status: status,
-                author: author,
-                review: review,
-                otherName: otherName,
-                thumbnail: thumbnail,
-                updatedAt: updatedAt,
-                updated: timeStamp,
-                view: view,
-                follow: follow,
-                slug: mangaSlug,
-                genres: genres,
-                chapterList: chapterList,
-            };
-
-            MangaSchema.insertMany([data]);
-            res.status(200).json({
-                success: true,
-                data: {
-                    'name': title,
-                    updatedAt,
-                    otherName,
-                    thumbnail,
-                    author,
-                    status,
-                    genres,
-                    view,
-                    review,
-                    chapterList,
-                    follow,
-                },
-            });
-        }
-
-        res.status(200).json({
-            success: true,
-            ///* A type alias. */
-            data: manga,
+            },
         });
     };
 
@@ -622,7 +483,7 @@ function ntController() {
         res: Response,
         next: NextFunction,
     ) => {
-        const {mangaSlug, chapter, chapterId} = req.params;
+        const { mangaSlug, chapter, chapterId } = req.params;
 
         const chapterSrc = await Nt.getChapterSrc(
             String(mangaSlug),
@@ -630,7 +491,7 @@ function ntController() {
             String(chapterId),
         );
 
-        if (!chapterSrc) return res.status(404).json({success: false});
+        if (!chapterSrc) return res.status(404).json({ success: false });
 
         res.json({
             success: true,
@@ -643,12 +504,12 @@ function ntController() {
         res: Response,
         next: NextFunction,
     ) => {
-        const {name} = req.query;
+        const { name } = req.query;
 
-        const {mangaData, totalPages} = await Nt.getMangaAuthor(name.trim());
+        const { mangaData, totalPages } = await Nt.getMangaAuthor(name.trim());
 
         if (!mangaData.length) {
-            return res.status(404).json({success: false});
+            return res.status(404).json({ success: false });
         }
 
         res.status(200).json({
@@ -669,7 +530,7 @@ function ntController() {
         filtersManga,
         getNewUpdatedManga,
         advancedSearch,
-        crawl_v1,
+        getMangaBy,
     };
 }
 
