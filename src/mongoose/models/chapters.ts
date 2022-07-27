@@ -20,7 +20,9 @@ const ChapterSchema = new Schema({
     totalComment: Number,
     unlockChapter: {},
     viewCount: Number,
-    isVipFreeComic: Boolean
+    isVipFreeComic: Boolean,
+    comic_id: String,
+    comic_slug: String,
 });
 
 export default mongoose.model('chapters', ChapterSchema);
