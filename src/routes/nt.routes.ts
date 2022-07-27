@@ -54,6 +54,4 @@ router.route('/new-updated').get(ntController().getNewUpdatedManga);
 */
 router.route('/completed').get(ntController().getCompletedManga);
 
-router.route('/mangas-by').get(ntController().getMangaBy);
-
 export default router;

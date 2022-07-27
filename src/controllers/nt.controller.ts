@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from 'express';
 import { getCache } from '../services/cache.service';
-import MangaSchema from '../mongoose/models/manga';
-import { Manga } from '@/mongoose/models';
+// import MangaSchema from '../mongoose/models/manga';
+// import { Manga } from '@/mongoose/models';
 
 import {
     KEY_CACHE_ADVANCED_MANGA,
@@ -124,39 +124,37 @@ function ntController() {
         const { page } = req.query;
         const _page = page !== undefined ? page : 1;
 
-        const key = `${KEY_CACHE_NEW_UPDATED_MANGA}${_page}`;
+        // const key = `${KEY_CACHE_NEW_UPDATED_MANGA}${_page}`;
 
-        const redisData = await getCache(key);
+        // const redisData = await getCache(key);
 
-        if (!redisData) {
-            const { mangaData, totalPages } = await Nt.getNewUpdatedManga(
-                _page,
-            );
+        // if (!redisData) {
+        const { mangaData, totalPages } = await Nt.getNewUpdatedManga(_page);
 
-            if (!mangaData.length) {
-                return res.status(404).json({ success: false });
-            }
-
-            return res.status(200).json({
-                success: true,
-                data: mangaData,
-                totalPages,
-                hasPrevPage: Number(page) > 1,
-                hasNextPage: Number(page) < Number(totalPages),
-            });
+        if (!mangaData.length) {
+            return res.status(404).json({ success: false });
         }
-
-        const { mangaData, totalPages } = JSON.parse(String(redisData));
-
-        if (!mangaData.length) return res.status(404).json({ success: false });
 
         return res.status(200).json({
             success: true,
             data: mangaData,
-            totalPages: totalPages,
-            hasPrevPage: Number(page) > 1 ? true : false,
-            hasNextPage: Number(page) < Number(totalPages) ? true : false,
+            totalPages,
+            hasPrevPage: Number(page) > 1,
+            hasNextPage: Number(page) < Number(totalPages),
         });
+        // }
+
+        // const { mangaData, totalPages } = JSON.parse(String(redisData));
+
+        // if (!mangaData.length) return res.status(404).json({ success: false });
+
+        // return res.status(200).json({
+        //     success: true,
+        //     data: mangaData,
+        //     totalPages: totalPages,
+        //     hasPrevPage: Number(page) > 1 ? true : false,
+        //     hasNextPage: Number(page) < Number(totalPages) ? true : false,
+        // });
     };
 
     const filtersManga = async (
@@ -223,41 +221,6 @@ function ntController() {
             totalPages: totalPages,
             hasPrevPage: Number(page) > 1,
             hasNextPage: Number(page) < Number(totalPages),
-        });
-    };
-
-    const getMangaBy = async (
-        req: Request<{}, {}, {}, FiltersManga>,
-        res: Response,
-        next: NextFunction,
-    ) => {
-        let { page, genres, status, limit } = req.query;
-
-        if (!limit) {
-            limit = 20;
-        }
-
-        let filter: any = {};
-        if (genres) {
-            filter['genres'] = genres;
-        }
-
-        if (status) {
-            filter['status'] = status;
-        }
-
-        console.log('limit', limit);
-        console.log('filter', filter);
-        const mangas = await MangaSchema.find({
-            'genres.slug': ['dam-my', 'manhua'],
-        })
-            .sort({ updated: -1 })
-            .limit(10);
-
-        return res.status(200).json({
-            success: true,
-            data: mangas,
-            total: mangas.length,
         });
     };
 
@@ -530,7 +493,6 @@ function ntController() {
         filtersManga,
         getNewUpdatedManga,
         advancedSearch,
-        getMangaBy,
     };
 }
 

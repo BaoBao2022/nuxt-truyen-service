@@ -111,7 +111,6 @@ export default class NtModel extends Scraper {
                     ),
                 );
 
-
                 switch (title) {
                     case 'Thể loại:':
                         genres = str.split(', ');
@@ -298,7 +297,7 @@ export default class NtModel extends Scraper {
             page,
         };
 
-        const key = `${KEY_CACHE_NEW_UPDATED_MANGA}${page}`;
+        // const key = `${KEY_CACHE_NEW_UPDATED_MANGA}${page}`;
 
         try {
             const { data } = await this.client.get(
@@ -312,12 +311,12 @@ export default class NtModel extends Scraper {
             //@ts-ignore
             const { mangaData, totalPages } = this.parseSource(document);
 
-            await cache(
-                key,
-                JSON.stringify({ mangaData, totalPages }),
-                page,
-                DEFAULT_EXPIRED_NEW_UPDATED_MANGA_TIME,
-            );
+            // await cache(
+            //     key,
+            //     JSON.stringify({ mangaData, totalPages }),
+            //     page,
+            //     DEFAULT_EXPIRED_NEW_UPDATED_MANGA_TIME,
+            // );
 
             return { mangaData, totalPages };
         } catch (error) {
