@@ -8,7 +8,7 @@ import axios from 'axios';
 import {cache, getCache} from '../services/cache.service';
 import {DEFAULT_EXPIRED_CHAPTERS, DEFAULT_EXPIRED_HOME_PAGE} from '../constants/nt';
 
-export default function wbController(arg: any) {
+export default function wbController() {
     const homePage = async (req: Request, res: Response) => {
         const key = 'home-page';
         const redisCacheData = await getCache(key);
