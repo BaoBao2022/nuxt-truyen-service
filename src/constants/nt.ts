@@ -4,6 +4,8 @@ export const DEFAULT_EXPIRED_COMPLETED_MANGA_TIME = 6 * 60; //6h
 export const DEFAULT_EXPIRED_RANKING_MANGA_TIME = 12 * 60; //h
 export const DEFAULT_EXPIRED_ADVANCED_SEARCH_MANGA = 5 * 60; //5m
 export const DEFAULT_EXPIRED_HOME_PAGE = 6 * 60; //6h
+export const DEFAULT_EXPIRED_CHAPTERS = 1 * 60; //6h
+
 export const KEY_CACHE_ADVANCED_MANGA = 'advancedSearchManga?id=';
 export const KEY_CACHE_COMPLETED_MANGA = 'completedManga?id=';
 export const KEY_CACHE_NEW_MANGA = 'newManga?id=';

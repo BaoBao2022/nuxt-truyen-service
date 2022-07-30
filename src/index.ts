@@ -7,7 +7,8 @@ import logger from 'morgan';
 import mongoose from "mongoose";
 
 import route from './routes';
-// import tasks from './services/cron.service';
+import tasks from './services/cron.service';
+
 dotenv.config();
 const app = express();
 const port = process.env.PORT || 5001;
@@ -56,4 +57,4 @@ app.listen(port, () => {
     console.log(`⚡️[server]: Server is running at ${port}`);
 });
 
-// tasks.forEach((task) => task.start());
+tasks.forEach((task) => task.start());

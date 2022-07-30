@@ -11,18 +11,18 @@ const ChapterSchema = new Schema({
     },
     chapterNum: String,
     chapterName: String,
-    pages: [],
+    // pages: [],
     chapterOrderIndex: Number,
     createdAt: String,
     isUnlocked: Boolean,
-    likedCount: Number,
+    // likedCount: Number,
     slug: String,
     totalComment: Number,
     unlockChapter: {},
-    viewCount: Number,
+    // viewCount: Number,
     isVipFreeComic: Boolean,
-    comic_id: String,
-    comic_slug: String,
+    comicId: String,
+    comicSlug: String,
 });
 
 export default mongoose.model('chapters', ChapterSchema);

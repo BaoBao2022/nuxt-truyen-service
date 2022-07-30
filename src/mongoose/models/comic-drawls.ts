@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
 
-const ComicSchema = new mongoose.Schema({
+const ComicDrawlSchema = new mongoose.Schema({
     _id: { type: String, required: true },
     type: { type: String, required: false },
     title: { type: String, required: false },
@@ -11,7 +11,7 @@ const ComicSchema = new mongoose.Schema({
     slug: { type: String, required: false },
     label: { type: String, required: false },
     platform: [],
-    author: {},
+    authors: [],
     chapCount: { type: Number, required: false },
     newestChapter: { type: String, required: false },
     averageRate: { type: Number, required: false },
@@ -30,7 +30,7 @@ const ComicSchema = new mongoose.Schema({
     squareLogo: { type: String, required: false },
     squareCover: { type: String, required: false },
     publishedAt: { type: String, required: false },
-    isNew: {type: Boolean, required: false},
+    // isNew: Boolean,
     updatedAt: { type: String, required: false },
     createdAt: { type: String, required: false },
     status: { type: String, required: false },
@@ -38,15 +38,14 @@ const ComicSchema = new mongoose.Schema({
     totalComment: { type: String, required: false },
     source: { type: String, required: false },
     tags: [],
-    description: String,
-    // commentsData: [],
-    // comicsRelated: [],
-    // community: {},
-    // totalUserDonatePoint: { type: Number, required: false },
-    // points: {},
-    // unlockComic: {},
-    // unlockChapter: {},
+    commentsData: [],
+    comicsRelated: [],
+    community: {},
+    totalUserDonatePoint: { type: Number, required: false },
+    points: {},
+    unlockComic: {},
+    unlockChapter: {},
 });
 
-export default mongoose.model("comics", ComicSchema);
+export default mongoose.model("comic-draws", ComicDrawlSchema);
 
