@@ -49,7 +49,7 @@ export default class NtModel extends Scraper {
         return this.instance;
     }
 
-    private parseSource(document: HTMLElement): NtDataList {
+    private parseSource(document: any): NtDataList {
         const mangaList = document.querySelectorAll('.item');
 
         const mangaData = [...mangaList].map((manga) => {
@@ -72,7 +72,7 @@ export default class NtModel extends Scraper {
             const comicItem = manga.querySelectorAll('.comic-item .chapter');
             let chapSuggests: any = [];
             if (comicItem) {
-                comicItem.forEach((item) => {
+                comicItem.forEach((item: any) => {
                     let newItem: any = {};
                     const chap = item.querySelector('a');
                     const i = item.querySelector('.time');
@@ -103,7 +103,7 @@ export default class NtModel extends Scraper {
             let follow = '';
             let comment = '';
 
-            tooltip.forEach((item) => {
+            tooltip.forEach((item: any) => {
                 const title = item.querySelector('label')?.textContent;
                 const str = normalizeString(
                     String(item.textContent).substring(
