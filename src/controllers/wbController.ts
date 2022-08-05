@@ -19,6 +19,7 @@ export default function wbController() {
             'covers.comicName': -1,
             'covers.slug': -1,
             'covers.link': -1,
+            'covers.animations': -1,
         };
 
         const comics = {
