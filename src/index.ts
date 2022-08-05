@@ -2,7 +2,7 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import express, { NextFunction, Request, Response } from 'express';
 import createError from 'http-errors';
-import { ErrorType } from '@/types/http';
+import { ErrorType } from './types/http';
 import logger from 'morgan';
 import mongoose from 'mongoose';
 
