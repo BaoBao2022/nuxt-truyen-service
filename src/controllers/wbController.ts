@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import Comic from '../mongoose/models/comic';
 import HomePage from '../mongoose/models/homepage';
+import NovelHome from '../mongoose/models/novel/novel-home';
 import Chapter from '../mongoose/models/chapters';
 import ChapterPages from '../mongoose/models/chapter-pages';
 import axios from 'axios';
@@ -12,6 +13,66 @@ import {
 } from '../constants/nt';
 
 export default function wbController() {
+    const novelHome = async (req: Request, res: Response) => {
+        const covers = {
+            'covers._id': -1,
+            'covers.comicId': -1,
+            'covers.comicName': -1,
+            'covers.slug': -1,
+            'covers.link': -1,
+            'covers.animations': -1,
+        };
+
+        const comics = {
+            'content.comics._id': -1,
+            'content.comics.comicName': -1,
+            'content.comics.tags': -1,
+            'content.comics.slug': -1,
+            'content.comics.verticalLogo': -1,
+            'content.comics.status': -1,
+            'content.comics.adultContent': -1,
+        };
+        const contents = {
+            'content._id': -1,
+            'content.comicName': -1,
+            'content.slug': -1,
+            'content.newestChapter': -1,
+            'content.verticalLogo': -1,
+            'content.adultContent': -1,
+            'content.label': -1,
+            'content.reviewCount': -1,
+            'content.followingCount': -1,
+            'content.likedCount': -1,
+            'content.viewCount': -1,
+            'content.categories': -1,
+            'content.status': -1,
+            'content.tags': -1,
+            'content.comicsReviewNewest': -1,
+            'content.name': -1,
+            'content.categoryVietName': -1,
+            ...comics,
+        };
+
+        const projection = {
+            type: -1,
+            typeName: -1,
+            ...covers,
+            ...contents,
+        };
+
+        const homepages = await NovelHome.find({}, projection)
+            .sort({
+                orderIndex: 1,
+            })
+            .limit(15);
+
+        return res.status(200).json({
+            status: true,
+            data: homepages,
+            total: homepages.length,
+        });
+    };
+
     const homePage = async (req: Request, res: Response) => {
         const covers = {
             'covers._id': -1,
@@ -59,9 +120,11 @@ export default function wbController() {
             ...contents,
         };
 
-        const homepages = await HomePage.find({}, projection).sort({
-            orderIndex: 1,
-        });
+        const homepages = await HomePage.find({}, projection)
+            .sort({
+                orderIndex: 1,
+            })
+            .limit(15);
 
         return res.status(200).json({
             status: true,
@@ -146,6 +209,7 @@ export default function wbController() {
     };
 
     return {
+        novelHome,
         homePage,
         getComic,
         readComic,

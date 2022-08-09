@@ -10,9 +10,10 @@ export default function (duration: number) {
         }
         const key = req.originalUrl;
         const cacheResponse = cache.get(key);
+
         if (cacheResponse) {
             console.log(`Cache hit for ${key}`);
-            res.send(cacheResponse);
+            res.send(JSON.parse(cacheResponse as string));
         } else {
             console.log(`Cache miss for ${key}`);
             res.originalSend = res.send;
