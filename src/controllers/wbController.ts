@@ -32,6 +32,7 @@ export default function wbController() {
             'content.comics.status': -1,
             'content.comics.adultContent': -1,
         };
+
         const contents = {
             'content._id': -1,
             'content.comicName': -1,
@@ -60,7 +61,7 @@ export default function wbController() {
             ...contents,
         };
 
-        const homepages = await NovelHome.find({}, projection)
+        const homepages = await NovelHome.find({})
             .sort({
                 orderIndex: 1,
             })
